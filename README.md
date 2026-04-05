@@ -2,7 +2,7 @@
 
 > A beautifully crafted, self-hosted chat interface powered by Claude. Dark theme, gradient aesthetics, streaming responses, and a full feature set — built to be deployed anywhere.
 
-![FLUX Main Chat](./screenshots/main.png)
+![FLUX Main Chat](./screenshots/flux_chat_preview.jpg
 
 ---
 
