@@ -28,7 +28,7 @@
 ## 📸 Screenshots
 
 ### Main Chat
-![FLUX Main Chat](./screenshots/main.png)
+![FLUX Main Chat](./screenshots/flux_chat_preview.jpg)
 
 ### Conversation Sidebar
 ![FLUX Sidebar](./screenshots/sidebar.png)
