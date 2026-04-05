@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FLUX — AI Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- API Key Gate -->
+  <div class="key-gate" id="key-gate">
+    <div class="key-gate-card">
+      <div class="key-gate-orb"></div>
+      <h1 class="key-gate-title">Welcome to FLUX</h1>
+      <p class="key-gate-sub">Paste your Anthropic API key to get started. It's stored only in your browser — never sent to any server.</p>
+      <div class="key-input-wrap">
+        <input type="password" id="key-input" class="key-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" />
+        <button class="key-show-btn" id="key-show-btn">👁</button>
+      </div>
+      <div class="key-gate-hint">
+        Get your key at <a href="https://console.anthropic.com/keys" target="_blank">console.anthropic.com</a>
+      </div>
+      <button class="key-submit-btn" id="key-submit-btn" disabled>Start chatting →</button>
+      <p class="key-gate-disclaimer">Your key is saved to localStorage in your browser only. Clear site data anytime to remove it.</p>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">CONVERSATIONS</span>
+      <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+    <button class="new-chat-btn" id="new-chat-btn">
+      <span>+</span> New conversation
+    </button>
+    <div class="history-list" id="history-list">
+      <!-- Injected by JS -->
+    </div>
+    <div class="sidebar-footer">
+      <div class="token-display" id="token-display">
+        <div class="token-row"><span class="token-label">TOKENS</span><span class="token-val" id="token-count">0</span></div>
+        <div class="token-row"><span class="token-label">EST. COST</span><span class="token-val" id="cost-count">$0.000</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Settings Drawer -->
+  <div class="drawer" id="settings-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">SETTINGS</span>
+      <button class="drawer-close" id="drawer-close">✕</button>
+    </div>
+    <div class="drawer-section">
+      <label class="drawer-label">API KEY</label>
+      <div class="key-status" id="key-status">
+        <span class="key-status-dot"></span>
+        <span class="key-status-text" id="key-status-text">Key saved in browser</span>
+      </div>
+      <button class="export-btn" id="change-key-btn">⚿ Change API key</button>
+      <button class="export-btn danger-btn" id="remove-key-btn">✕ Remove key &amp; sign out</button>
+    </div>
+    <div class="drawer-section">
+      <label class="drawer-label">SYSTEM PROMPT</label>
+      <textarea class="drawer-textarea" id="system-prompt" placeholder="You are a helpful assistant...">You are FLUX, a brilliant and creative AI assistant. Be concise, insightful, and occasionally poetic.</textarea>
+      <button class="drawer-save" id="save-system-prompt">SAVE PROMPT</button>
+    </div>
+    <div class="drawer-section">
+      <label class="drawer-label">SOUND EFFECTS</label>
+      <div class="toggle-row">
+        <span class="toggle-desc">Typing sounds</span>
+        <label class="toggle">
+          <input type="checkbox" id="sound-toggle" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <label class="drawer-label">EXPORT</label>
+      <button class="export-btn" id="export-md">↓ Export as .md</button>
+      <button class="export-btn" id="export-txt">↓ Export as .txt</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main App -->
+  <div class="app" id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="icon-btn" id="history-btn" title="Conversations">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
+        </button>
+        <div class="logo-wrap">
+          <div class="logo-orb"></div>
+          <div class="brand-text">
+            <span class="brand-name">FLUX</span>
+            <span class="brand-sub">claude-sonnet-4-5</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-center">
+        <div class="persona-pills" id="persona-pills">
+          <button class="pill active" data-persona="default">Default</button>
+          <button class="pill" data-persona="coder">Coder</button>
+          <button class="pill" data-persona="writer">Writer</button>
+          <button class="pill" data-persona="philosopher">Philosopher</button>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" id="settings-btn" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn danger" id="clear-btn" title="Clear chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat -->
+    <main class="chat-area" id="chat-area">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-orb"></div>
+        <h2 class="empty-title">FLUX is ready</h2>
+        <p class="empty-sub">Ask anything. Think out loud. Explore together.</p>
+        <div class="starter-chips">
+          <button class="chip" data-msg="What's the most fascinating thing happening in AI right now?">✦ AI frontiers</button>
+          <button class="chip" data-msg="Write me a short poem about the ocean at night.">✦ Write a poem</button>
+          <button class="chip" data-msg="Explain quantum entanglement like I'm 10.">✦ Quantum for kids</button>
+          <button class="chip" data-msg="Give me a Python snippet to fetch and parse JSON from an API.">✦ Code: fetch JSON</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Voice + Input -->
+    <footer class="input-area">
+      <div class="input-wrapper">
+        <button class="mic-btn" id="mic-btn" title="Voice input">
+          <svg id="mic-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <textarea class="input-field" id="input-field" placeholder="Message FLUX…" rows="1"></textarea>
+        <button class="send-btn" id="send-btn" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="footer-note">FLUX · Powered by Claude · <span id="status-text">Ready</span></div>
+    </footer>
+  </div>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
