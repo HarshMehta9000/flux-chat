@@ -31,10 +31,10 @@
 ![FLUX Main Chat](./screenshots/flux_chat_preview.jpg)
 
 ### Conversation Sidebar
-![FLUX Sidebar](./screenshots/sidebar.png)
+![FLUX Sidebar](./screenshots/flux_sidebar_preview.jpg)
 
 ### Settings Drawer
-![FLUX Settings](./screenshots/settings.png)
+![FLUX Settings](./screenshots/flux_settings_preview.jpg)
 
 ---
 
